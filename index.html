@@ -383,7 +383,8 @@
                                 }      
                             }
                             else if(!semRot && land)
-                                spaceScene();   
+                                spaceScene();
+                                backgroundSound = new BABYLON.Sound("SpaceshipMotor", "sounds/earth.mp3", scene, null, { loop: true, autoplay: true, volume: 0.5 });   
                             break;  
                     }
                 }
