@@ -55,10 +55,14 @@
         var scene = null;
         var createDefaultEngine = function () { return new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true }); };
         var scene, camera, backgroundSound;
-        var planet1, planet2, planet3;
+        var planet1, planet2, planet3, spaceDek, bigplanet, panelMenu;
+        var textureplanet, fireMaterial, snowMaterial, earthMaterial;
+
+        var sem = false, sempl = false, sempr = false, semRot = false;
         var createScene = function () {
             scene = new BABYLON.Scene(engine);
             camera = new BABYLON.ArcRotateCamera("Camera", -Math.PI / 2, Math.PI / 2, 4, BABYLON.Vector3.Zero(), scene);
+
             initialMenu();
 
             return scene;
@@ -69,6 +73,9 @@
             scene.onPointerDown = function (evt, pickResult) {
                 if (pickResult.hit && pickResult.pickedMesh.id == 'planet1') {
                     console.log("planeta de fogo!");
+                    textureplanet = 1;
+                    sem = true;
+                    sempl = true;
                     backgroundSound.dispose();
                     backgroundSound = new BABYLON.Sound("SpaceshipMotor", "sounds/travel-sound.ogg", scene, null, { loop: false, autoplay: true });
                     setTimeout(function () { timeTravel(); }, 5000);
@@ -76,6 +83,8 @@
 
                 else if (pickResult.hit && pickResult.pickedMesh.id == 'planet2') {
                     console.log("planeta de gelo!");
+                    textureplanet = 2;
+                    sem = true;
                     backgroundSound.dispose();
                     backgroundSound = new BABYLON.Sound("SpaceshipMotor", "sounds/travel-sound.ogg", scene, null, { loop: false, autoplay: true });
                     setTimeout(function () { timeTravel(); }, 5000);
@@ -83,6 +92,9 @@
 
                 else if (pickResult.hit && pickResult.pickedMesh.id == 'planet3') {
                     console.log("planeta de terra!");
+                    textureplanet = 3;
+                    sem = true;
+                    sempr = true;
                     backgroundSound.dispose();
                     backgroundSound = new BABYLON.Sound("SpaceshipMotor", "sounds/travel-sound.ogg", scene, null, { loop: false, autoplay: true });
                     setTimeout(function () { timeTravel(); }, 5000);
@@ -92,6 +104,7 @@
 
         function timeTravel() {
             scene.dispose();
+            sem = false;
             scene = new BABYLON.Scene(engine);
             camera = new BABYLON.ArcRotateCamera("Camera", 0, Math.PI / 2, 12, BABYLON.Vector3.Zero(), scene);
 
@@ -232,6 +245,175 @@
                 shaderMaterial.setVector3("cameraPosition", scene.activeCamera.position);
 
             });
+
+            setTimeout(function () { mesh.dispose(); camera.dispose(); closePlanet(); }, 5000);
+        }
+
+        function closePlanet() {
+            //scene.dispose()
+            var spaceScale = 100.0;
+            semRot = true;
+            var space = BABYLON.Mesh.CreateCylinder("space", 10 * spaceScale, 0, 6 * spaceScale, 20, 20, scene);
+            camera = new BABYLON.ArcRotateCamera("Camera", 0, 0, -30, BABYLON.Vector3.Zero(), scene);
+
+            var light = new BABYLON.PointLight("light", new BABYLON.Vector3(-20, 25, 0), scene);
+            light.range = 50;
+            var hemisphericLight = new BABYLON.HemisphericLight("hemi", new BABYLON.Vector3(0, 0.5, 0), scene);
+
+            var starfieldPT = new BABYLON.StarfieldProceduralTexture("starfieldPT", 512, scene);
+            var starfieldMaterial = new BABYLON.StandardMaterial("starfield", scene);
+            starfieldMaterial.diffuseTexture = starfieldPT;
+            starfieldMaterial.diffuseTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
+            starfieldMaterial.backFaceCulling = false;
+            starfieldPT.beta = 0.1;
+
+            space.material = starfieldMaterial;
+
+            scene.registerBeforeRender(function () {
+                starfieldPT.time += scene.getAnimationRatio() * 0.8;
+            });
+            bigplanet = BABYLON.Mesh.CreateSphere("bigplanet", 10, 60, scene);
+            bigplanet.position.y = 100;
+            if(textureplanet === 3){
+                earthMaterial = new BABYLON.StandardMaterial("floor", scene);
+                earthMaterial.diffuseTexture = new BABYLON.Texture("textures/earthplanet.png", scene);
+                earthMaterial.diffuseTexture.uScale = 1;
+                earthMaterial.diffuseTexture.vScale = 1;
+                bigplanet.material = earthMaterial;
+            }
+            else if(textureplanet === 2){
+                snowMaterial = new BABYLON.StandardMaterial("floor", scene);
+                snowMaterial.diffuseTexture = new BABYLON.Texture("textures/snowplanet.png", scene);
+                snowMaterial.diffuseTexture.uScale = 1;
+                snowMaterial.diffuseTexture.vScale = 1;
+                bigplanet.material = snowMaterial;
+            }
+            else{
+                fireMaterial = new BABYLON.StandardMaterial("floor", scene);
+                fireMaterial.diffuseTexture = new BABYLON.Texture("textures/fireplanet.png", scene);
+                fireMaterial.diffuseTexture.uScale = 1;
+                fireMaterial.diffuseTexture.vScale = 1;
+                bigplanet.material = fireMaterial;
+            }
+
+            backgroundSound = new BABYLON.Sound("SpaceshipMotor", "sounds/spaceship-sound.wav", scene, null, { loop: true, autoplay: true });
+            spaceDek;
+            BABYLON.SceneLoader.ImportMesh("Vaisseau", "//david.blob.core.windows.net/babylonjs/banner/SpaceDek/", "SpaceDek.babylon", scene, function (newMeshes, particleSystems) {
+                spaceDek = newMeshes[0];
+                spaceDek.position = new BABYLON.Vector3(6, 0, 0);
+                spaceDek.scaling = new BABYLON.Vector3(0.2, 0.2, 0.2);
+                spaceDek.rotation.y = Math.PI;
+                spaceDek.rotation.z = -Math.PI / 7 * 3;
+                spaceDek.rotation.x = Math.PI;
+
+                scene.stopAnimation(spaceDek);
+                for (var i = 0; i < particleSystems.length; i++) {
+                    if (particleSystems[i].emitter.name == "Part006" || particleSystems[i].emitter.name == "Part007") {
+                        particleSystems[i].stop();
+                    }
+                }
+            });
+            landingGUI();
+            controlLandingKey();
+        }
+
+        function landingGUI(){
+            var advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+
+            var panelI = new BABYLON.GUI.StackPanel();
+            panelI.width = "750px";
+            panelI.height = "300px";
+            panelI.fontSize = "25px";
+            panelI.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
+            panelI.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
+            advancedTexture.addControl(panelI);
+
+            var textb = new BABYLON.GUI.TextBlock();
+            textb.text = "Pressione F para pousar!";
+            textb.height = "200px";
+            textb.color = "white"
+            textb.paddingTop = "30px";
+            panelI.addControl(textb);
+        }
+
+        function MenuGUI(){
+            var advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+
+            panelMenu = new BABYLON.GUI.StackPanel();
+            panelMenu.width = "750px";
+            panelMenu.height = "300px";
+            panelMenu.fontSize = "25px";
+            panelMenu.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
+            panelMenu.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_CENTER;
+            advancedTexture.addControl(panelMenu);
+
+            var textb = new BABYLON.GUI.TextBlock();
+            textb.text = "Pressione F para pousar!";
+            textb.height = "200px";
+            textb.color = "white"
+            textb.paddingTop = "30px";
+            panelMenu.addControl(textb);
+        }
+
+        function controlMenu(){
+            scene.actionManager = new BABYLON.ActionManager(scene);
+
+            scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(
+                BABYLON.ActionManager.OnKeyDownTrigger, function (evt) {
+                    var key = evt.sourceEvent.key;
+                    key = key.toUpperCase();
+
+                    switch (key) {
+                        case 'M': console.log("menu"); break;
+                    }
+                }
+            ));
+        }
+
+        function controlLandingKey(){
+            scene.actionManager = new BABYLON.ActionManager(scene);
+
+            scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(
+                BABYLON.ActionManager.OnKeyDownTrigger, function (evt) {
+                    var key = evt.sourceEvent.key;
+                    key = key.toUpperCase();
+
+                    switch (key) {
+                        case 'F': console.log("POUSAR!"); break;
+                    }
+                }
+            ));
+        }
+
+        function animationPlanetRot(){
+            bigplanet.rotation.x += 0.001;
+            bigplanet.rotation.y -= 0.001;
+        }
+
+        function animationPlanet() {
+            if (sempr) {
+                console.log("entrou")
+                planet1.position.z += 0.1
+                planet2.position.z += 0.1
+                planet3.position.z += 0.1
+                if (planet3.position.z >= 0)
+                    sempr = false;
+                spaceDek.position.y += 0.5;
+            }
+
+            if (!sempr && !sempl) {
+                spaceDek.position.y += 0.5;
+            }
+
+            if (sempl) {
+                planet1.position.z -= 0.1
+                planet2.position.z -= 0.1
+                planet3.position.z -= 0.1
+                if (planet1.position.z <= 0)
+                    sempl = false;
+                spaceDek.position.y += 0.5;
+            }
+
         }
 
         function spaceScene() {
@@ -244,7 +426,17 @@
             var light = new BABYLON.PointLight("light", new BABYLON.Vector3(-20, 25, 0), scene);
             light.range = 50;
 
-            var fireMaterial = new BABYLON.StandardMaterial("floor", scene);
+            earthMaterial = new BABYLON.StandardMaterial("floor", scene);
+            earthMaterial.diffuseTexture = new BABYLON.Texture("textures/earthplanet.png", scene);
+            earthMaterial.diffuseTexture.uScale = 1;
+            earthMaterial.diffuseTexture.vScale = 1;
+
+            snowMaterial = new BABYLON.StandardMaterial("floor", scene);
+            snowMaterial.diffuseTexture = new BABYLON.Texture("textures/snowplanet.png", scene);
+            snowMaterial.diffuseTexture.uScale = 1;
+            snowMaterial.diffuseTexture.vScale = 1;
+            
+            fireMaterial = new BABYLON.StandardMaterial("floor", scene);
             fireMaterial.diffuseTexture = new BABYLON.Texture("textures/fireplanet.png", scene);
             fireMaterial.diffuseTexture.uScale = 1;
             fireMaterial.diffuseTexture.vScale = 1;
@@ -255,21 +447,12 @@
             planet1.position.x = -8;
             planet1.material = fireMaterial;
 
-            var snowMaterial = new BABYLON.StandardMaterial("floor", scene);
-            snowMaterial.diffuseTexture = new BABYLON.Texture("textures/snowplanet.png", scene);
-            snowMaterial.diffuseTexture.uScale = 1;
-            snowMaterial.diffuseTexture.vScale = 1;
-
             planet2 = BABYLON.Mesh.CreateSphere("planet2", 10, 3, scene);
             planet2.position.z = 0;
             planet2.position.y = 10;
             planet2.position.x = -6;
             planet2.material = snowMaterial;
 
-            var earthMaterial = new BABYLON.StandardMaterial("floor", scene);
-            earthMaterial.diffuseTexture = new BABYLON.Texture("textures/earthplanet.png", scene);
-            earthMaterial.diffuseTexture.uScale = 1;
-            earthMaterial.diffuseTexture.vScale = 1;
 
             planet3 = BABYLON.Mesh.CreateSphere("planet3", 10, 4, scene);
             planet3.position.z = -30;
@@ -279,7 +462,7 @@
 
             //get spaceship
             backgroundSound = new BABYLON.Sound("SpaceshipMotor", "sounds/spaceship-sound.wav", scene, null, { loop: true, autoplay: true });
-            var spaceDek;
+            spaceDek;
             BABYLON.SceneLoader.ImportMesh("Vaisseau", "//david.blob.core.windows.net/babylonjs/banner/SpaceDek/", "SpaceDek.babylon", scene, function (newMeshes, particleSystems) {
                 spaceDek = newMeshes[0];
                 spaceDek.position = new BABYLON.Vector3(6, 0, 0);
@@ -377,6 +560,10 @@
 
         engine.runRenderLoop(function () {
             if (scene) {
+                if (sem)
+                    animationPlanet();
+                if(semRot)
+                    animationPlanetRot();
                 scene.render();
             }
         });
