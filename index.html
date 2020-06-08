@@ -58,8 +58,8 @@
         var scene, camera, backgroundSound, menu, advancedTextureMenu;
         var planet1, planet2, planet3, spaceDek, bigplanet;
         var textureplanet, fireMaterial, snowMaterial, earthMaterial;
+        var sem = false, sempl = false, sempr = false, semRot = false, land = false;
 
-        var sem = false, sempl = false, sempr = false, semRot = false;
         var createScene = function () {
             scene = new BABYLON.Scene(engine);
             camera = new BABYLON.ArcRotateCamera("Camera", -Math.PI / 2, Math.PI / 2, 4, BABYLON.Vector3.Zero(), scene);
@@ -355,7 +355,7 @@
             panelI.addControl(container)
 
             var textb = new BABYLON.GUI.TextBlock();
-            textb.text = "Tiago Machado Maldonado - RA: 171047 || Lucas Souza Maximiano - RA: 171114\nEste projeto tem como objetivo fazer um jogo de exploração no espaço.\nDurante o jogo terão mensagens indicando o que deve ser feito,\n assim como as teclas para utilizar.";
+            textb.text = "Tiago Machado Maldonado - RA: 171047 || Lucas Souza Maximiano - RA: 171114\nEste projeto tem como objetivo fazer um jogo de exploração no espaço.\nPressione F para Pousar depois de selecionar um planeta\n e pressione novamente para voltar ao espaço.";
             textb.height = "200px";
             textb.color = "black"
             textb.paddingTop = "30px";
@@ -372,7 +372,19 @@
 
                     switch (key) {
                         case 'M': menu = !menu; menu?MenuGUI() : advancedTextureMenu.dispose(); break;
-                        case 'F': if(semRot){console.log("POUSAR!"); scene = new earth().getScene(); backgroundSound.dispose();} break;
+                        case 'F':
+                            if(semRot){
+                                land = !land; 
+                                if(land){
+                                    console.log("POUSAR!"); 
+                                    scene = new earth().getScene();
+                                    backgroundSound.dispose();
+                                    semRot = false;
+                                }      
+                            }
+                            else if(!semRot && land)
+                                spaceScene();   
+                            break;  
                     }
                 }
             ));
