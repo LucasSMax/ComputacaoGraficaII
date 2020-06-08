@@ -315,7 +315,6 @@
                 }
             });
             landingGUI();
-            controlLandingKey();
             controlMenu();
         }
 
@@ -373,21 +372,7 @@
 
                     switch (key) {
                         case 'M': menu = !menu; menu?MenuGUI() : advancedTextureMenu.dispose(); break;
-                    }
-                }
-            ));
-        }
-
-        function controlLandingKey(){
-            scene.actionManager = new BABYLON.ActionManager(scene);
-
-            scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(
-                BABYLON.ActionManager.OnKeyDownTrigger, function (evt) {
-                    var key = evt.sourceEvent.key;
-                    key = key.toUpperCase();
-
-                    switch (key) {
-                        case 'F': console.log("POUSAR!"); break;
+                        case 'F': if(semRot){console.log("POUSAR!"); scene = new earth().getScene(); backgroundSound.dispose();} break;
                     }
                 }
             ));
