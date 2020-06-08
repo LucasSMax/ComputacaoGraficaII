@@ -48,7 +48,7 @@ class earth
         this.waterMaterial.waveLength = 0.1;
         this.waterMaterial.waveSpeed = 100.0;
         this.waterMaterial.colorBlendFactor = 0;
-        this. waterMaterial.windDirection = new BABYLON.Vector2(1, 1);
+        this.waterMaterial.windDirection = new BABYLON.Vector2(1, 1);
         this.waterMaterial.colorBlendFactor = 0;
         this.waterMaterial.waterColor = new BABYLON.Color3(0, 0.4, 0.85);
         this.waterMesh = BABYLON.Mesh.CreateGround("waterMesh", 512, 512, 32, this.scene, false);
