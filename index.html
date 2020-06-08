@@ -62,19 +62,18 @@
         var sem = false, sempl = false, sempr = false, semRot = false, land = false;
 
         var createScene = function () {
-            // scene = new BABYLON.Scene(engine);
-            //camera = new BABYLON.ArcRotateCamera("Camera", -Math.PI / 2, Math.PI / 2, 4, BABYLON.Vector3.Zero(), scene);
+            scene = new BABYLON.Scene(engine);
+            camera = new BABYLON.ArcRotateCamera("Camera", -Math.PI / 2, Math.PI / 2, 4, BABYLON.Vector3.Zero(), scene);
 
-            // initialMenu();
+            initialMenu();
 
-            return new Vulcan().getScene();
+            return scene;
         };
 
         function managerEvents() {
             let t, i = 4;
             scene.onPointerDown = function (evt, pickResult) {
                 if (pickResult.hit && pickResult.pickedMesh.id == 'planet1') {
-                    console.log("planeta de fogo!");
                     textureplanet = 1;
                     sem = true;
                     sempl = true;
@@ -84,7 +83,6 @@
                 }
 
                 else if (pickResult.hit && pickResult.pickedMesh.id == 'planet2') {
-                    console.log("planeta de gelo!");
                     textureplanet = 2;
                     sem = true;
                     backgroundSound.dispose();
@@ -93,7 +91,6 @@
                 }
 
                 else if (pickResult.hit && pickResult.pickedMesh.id == 'planet3') {
-                    console.log("planeta de terra!");
                     textureplanet = 3;
                     sem = true;
                     sempr = true;
@@ -377,15 +374,23 @@
                             if(semRot){
                                 land = !land; 
                                 if(land){
-                                    console.log("POUSAR!"); 
-                                    scene = new earth().getScene();
-                                    backgroundSound.dispose();
+                                    if(textureplanet === 1){
+                                        scene = new Vulcan().getScene();
+                                        backgroundSound.dispose();
+                                        backgroundSound = new BABYLON.Sound("vulcan", "sounds/lava.wav", scene, null, { loop: true, autoplay: true, volume: 0.5 }); 
+                                    } 
+                                          
+                                    else if(textureplanet === 3){
+                                        scene = new Earth().getScene();
+                                        backgroundSound.dispose();
+                                        backgroundSound = new BABYLON.Sound("waves", "sounds/earth.mp3", scene, null, { loop: true, autoplay: true, volume: 0.5 }); 
+                                    }     
                                     semRot = false;
                                 }      
                             }
                             else if(!semRot && land)
                                 spaceScene();
-                                backgroundSound = new BABYLON.Sound("SpaceshipMotor", "sounds/earth.mp3", scene, null, { loop: true, autoplay: true, volume: 0.5 });   
+                                
                             break;  
                     }
                 }
@@ -399,7 +404,6 @@
 
         function animationPlanet() {
             if (sempr) {
-                console.log("entrou")
                 planet1.position.z += 0.1
                 planet2.position.z += 0.1
                 planet3.position.z += 0.1

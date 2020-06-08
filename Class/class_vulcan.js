@@ -19,7 +19,7 @@ class Vulcan
         this.light = new BABYLON.HemisphericLight("HemiLight", new BABYLON.Vector3(0, 1, 0), this.scene);
 
         this.camera = new BABYLON.ArcRotateCamera("Camera", 0,0,0, BABYLON.Vector3.Zero(), this.scene);
-        this.camera.setPosition(new BABYLON.Vector3(10, 10, -10));
+        this.camera.setPosition(new BABYLON.Vector3(10, 150, -30));
         this.camera.attachControl(canvas, true);
     }
 
