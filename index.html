@@ -29,6 +29,7 @@
     <script src="https://preview.babylonjs.com/gui/babylon.gui.min.js"></script>
     <script src="Class/class_earth.js"></script>
     <script src="Class/class_vulcan.js"></script>
+    <script src="Class/class_snow.js"></script>
 
     <style>
         html,
@@ -59,7 +60,7 @@
         var scene, camera, backgroundSound, menu, advancedTextureMenu;
         var planet1, planet2, planet3, spaceDek, bigplanet;
         var textureplanet, fireMaterial, snowMaterial, earthMaterial;
-        var sem = false, sempl = false, sempr = false, semRot = false, land = false;
+        var sem = false, sempl = false, sempr = false, semRot = false, land = true;
 
         var createScene = function () {
             scene = new BABYLON.Scene(engine);
@@ -252,6 +253,7 @@
             //scene.dispose(
             var spaceScale = 100.0;
             semRot = true;
+            land = true;
             var space = BABYLON.Mesh.CreateCylinder("space", 10 * spaceScale, 0, 6 * spaceScale, 20, 20, scene);
             camera = new BABYLON.ArcRotateCamera("Camera", 0, 0, -30, BABYLON.Vector3.Zero(), scene);
 
@@ -296,7 +298,6 @@
             }
 
             backgroundSound = new BABYLON.Sound("SpaceshipMotor", "sounds/spaceship-sound.wav", scene, null, { loop: true, autoplay: true });
-            spaceDek;
             BABYLON.SceneLoader.ImportMesh("Vaisseau", "//david.blob.core.windows.net/babylonjs/banner/SpaceDek/", "SpaceDek.babylon", scene, function (newMeshes, particleSystems) {
                 spaceDek = newMeshes[0];
                 spaceDek.position = new BABYLON.Vector3(6, 0, 0);
@@ -313,7 +314,6 @@
                 }
             });
             landingGUI();
-            controlMenu();
         }
 
         function landingGUI(){
@@ -367,29 +367,40 @@
                 BABYLON.ActionManager.OnKeyDownTrigger, function (evt) {
                     var key = evt.sourceEvent.key;
                     key = key.toUpperCase();
-
+                    console.log("tentativa");
                     switch (key) {
                         case 'M': menu = !menu; menu?MenuGUI() : advancedTextureMenu.dispose(); break;
                         case 'F':
-                            if(semRot){
-                                land = !land; 
+                            if(semRot){ 
                                 if(land){
                                     if(textureplanet === 1){
+                                        
                                         scene = new Vulcan().getScene();
                                         backgroundSound.dispose();
-                                        backgroundSound = new BABYLON.Sound("vulcan", "sounds/lava.wav", scene, null, { loop: true, autoplay: true, volume: 0.5 }); 
+                                        //backgroundSound = new BABYLON.Sound("vulcan", "sounds/lava.wav", scene, null, { loop: true, autoplay: true, volume: 0.5 }); 
                                     } 
                                           
                                     else if(textureplanet === 3){
                                         scene = new Earth().getScene();
                                         backgroundSound.dispose();
-                                        backgroundSound = new BABYLON.Sound("waves", "sounds/earth.mp3", scene, null, { loop: true, autoplay: true, volume: 0.5 }); 
-                                    }     
+                                        //backgroundSound = new BABYLON.Sound("waves", "sounds/earth.mp3", scene, null, { loop: true, autoplay: true, volume: 0.5 }); 
+                                    }
+                                    
+                                    else if(textureplanet === 2){
+                                        console.log("gelo")
+                                        scene = new Snow().getScene();
+                                        backgroundSound.dispose();
+                                        //backgroundSound = new BABYLON.Sound("waves", "sounds/ice.wav", scene, null, { loop: true, autoplay: true, volume: 0.5 }); 
+                                    }
                                     semRot = false;
                                 }      
                             }
-                            else if(!semRot && land)
+                            else if(!semRot && land){
+                                console.log("fudeu");
+                                land = false;
                                 spaceScene();
+                            }
+                                
                                 
                             break;  
                     }
@@ -428,7 +439,7 @@
         }
 
         function spaceScene() {
-            scene.dispose();
+            
             scene = new BABYLON.Scene(engine);
             camera = new BABYLON.ArcRotateCamera("Camera", 0, 0, -30, BABYLON.Vector3.Zero(), scene);
             spaceGUI();
@@ -473,7 +484,6 @@
 
             //get spaceship
             backgroundSound = new BABYLON.Sound("SpaceshipMotor", "sounds/spaceship-sound.wav", scene, null, { loop: true, autoplay: true });
-            spaceDek;
             BABYLON.SceneLoader.ImportMesh("Vaisseau", "//david.blob.core.windows.net/babylonjs/banner/SpaceDek/", "SpaceDek.babylon", scene, function (newMeshes, particleSystems) {
                 spaceDek = newMeshes[0];
                 spaceDek.position = new BABYLON.Vector3(6, 0, 0);
@@ -507,7 +517,6 @@
             scene.registerBeforeRender(function () {
                 starfieldPT.time += scene.getAnimationRatio() * 0.8;
             });
-            controlMenu();
         }
 
         function initialMenu() {
