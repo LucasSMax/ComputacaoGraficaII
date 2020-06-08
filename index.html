@@ -27,6 +27,7 @@
     <script src="https://preview.babylonjs.com/loaders/babylonjs.loaders.js"></script>
     <script src="https://preview.babylonjs.com/serializers/babylonjs.serializers.min.js"></script>
     <script src="https://preview.babylonjs.com/gui/babylon.gui.min.js"></script>
+    <script src="Class/class_earth.js"></script>
 
     <style>
         html,
@@ -54,8 +55,8 @@
         var engine = null;
         var scene = null;
         var createDefaultEngine = function () { return new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true }); };
-        var scene, camera, backgroundSound;
-        var planet1, planet2, planet3, spaceDek, bigplanet, panelMenu;
+        var scene, camera, backgroundSound, menu, advancedTextureMenu;
+        var planet1, planet2, planet3, spaceDek, bigplanet;
         var textureplanet, fireMaterial, snowMaterial, earthMaterial;
 
         var sem = false, sempl = false, sempr = false, semRot = false;
@@ -250,7 +251,7 @@
         }
 
         function closePlanet() {
-            //scene.dispose()
+            //scene.dispose(
             var spaceScale = 100.0;
             semRot = true;
             var space = BABYLON.Mesh.CreateCylinder("space", 10 * spaceScale, 0, 6 * spaceScale, 20, 20, scene);
@@ -315,6 +316,7 @@
             });
             landingGUI();
             controlLandingKey();
+            controlMenu();
         }
 
         function landingGUI(){
@@ -337,22 +339,28 @@
         }
 
         function MenuGUI(){
-            var advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+            advancedTextureMenu = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
 
-            panelMenu = new BABYLON.GUI.StackPanel();
-            panelMenu.width = "750px";
-            panelMenu.height = "300px";
-            panelMenu.fontSize = "25px";
-            panelMenu.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
-            panelMenu.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_CENTER;
-            advancedTexture.addControl(panelMenu);
+            var panelI = new BABYLON.GUI.StackPanel();
+            panelI.width = "1000px";
+            panelI.height = "300px";
+            panelI.fontSize = "25px";
+            panelI.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
+            panelI.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_CENTER;
+            advancedTextureMenu.addControl(panelI);
+
+            var container = new BABYLON.GUI.Rectangle();
+            container.color = "Black";
+            container.thickness = 4;
+            container.background = "grey";
+            panelI.addControl(container)
 
             var textb = new BABYLON.GUI.TextBlock();
-            textb.text = "Pressione F para pousar!";
+            textb.text = "Tiago Machado Maldonado - RA: 171047 || Lucas Souza Maximiano - RA: 171114\nEste projeto tem como objetivo fazer um jogo de exploração no espaço.\nDurante o jogo terão mensagens indicando o que deve ser feito,\n assim como as teclas para utilizar.";
             textb.height = "200px";
-            textb.color = "white"
+            textb.color = "black"
             textb.paddingTop = "30px";
-            panelMenu.addControl(textb);
+            panelI.addControl(textb);
         }
 
         function controlMenu(){
@@ -364,7 +372,7 @@
                     key = key.toUpperCase();
 
                     switch (key) {
-                        case 'M': console.log("menu"); break;
+                        case 'M': menu = !menu; menu?MenuGUI() : advancedTextureMenu.dispose(); break;
                     }
                 }
             ));
@@ -496,6 +504,7 @@
             scene.registerBeforeRender(function () {
                 starfieldPT.time += scene.getAnimationRatio() * 0.8;
             });
+            controlMenu();
         }
 
         function initialMenu() {
@@ -533,6 +542,7 @@
                 spaceScene();
             });
             advancedTexture.addControl(button1);
+            controlMenu();
         }
 
         function spaceGUI() {
